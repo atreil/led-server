@@ -13,6 +13,7 @@ import (
 )
 
 func handleClear(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Got method: %s\n", r.Method)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Not allowed"))
@@ -24,9 +25,11 @@ func handleClear(w http.ResponseWriter, r *http.Request) {
 
 	leds := make([]uint32, *numLeds)
 	if err := dev.SetLedsSync(0, leds); err != nil {
+		fmt.Printf("Error setting leds: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 	} else {
+		fmt.Printf("Success\n")
 		w.WriteHeader(http.StatusOK)
 	}
 }
