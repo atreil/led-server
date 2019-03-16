@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,6 +38,7 @@ var numLeds = flag.Int("leds", 300, "Number of leds")
 var port = flag.String("port", ":80", "The port")
 
 func main() {
+	fmt.Println("Starting up...")
 	var err error
 	mux = &sync.Mutex{}
 
@@ -58,8 +60,10 @@ func main() {
 	}()
 
 	http.HandleFunc("/clear", handleClear)
+	fmt.Println("Listening...")
 	http.ListenAndServe(*port, nil)
 	<-w
+	fmt.Println("Goodbye!")
 }
 
 func checkError(err error) {
