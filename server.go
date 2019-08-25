@@ -33,6 +33,9 @@ func makeHandler(fn handlerFunc, protocols ...string) func(http.ResponseWriter, 
 		}
 
 		w.WriteHeader(http.StatusOK)
+		if err := dev.Render(); err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
 	}
 }
 
