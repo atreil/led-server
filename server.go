@@ -1,76 +1,69 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-
-	ws2811 "github.com/rpi-ws281x/rpi-ws281x-go"
+	"time"
 )
 
-func handleClear(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Got method: %s\n", r.Method)
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Not allowed"))
-		return
-	}
+type handlerFunc func(http.ResponseWriter, *http.Request) error
 
-	mux.Lock()
-	defer mux.Unlock()
+func makeHandler(fn handlerFunc, protocols ...string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		allowed := false
+		for _, protocol := range protocols {
+			if r.Method == protocol {
+				allowed = true
+				break
+			}
+		}
 
-	leds := make([]uint32, *numLeds)
-	if err := dev.SetLedsSync(0, leds); err != nil {
-		fmt.Printf("Error setting leds: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-	} else {
-		fmt.Printf("Success\n")
+		if !allowed {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+
+		if err := fn(w, r); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("%v\n", err.Error())))
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-var dev *ws2811.WS2811
-var mux *sync.Mutex
+var port = flag.String("port", ":8080", "The port")
 
-var numLeds = flag.Int("leds", 300, "Number of leds")
-var port = flag.String("port", ":80", "The port")
+func newHTTPServer() *http.Server {
+	mux := http.NewServeMux()
 
-func main() {
-	fmt.Println("Starting up...")
-	var err error
-	mux = &sync.Mutex{}
+	// Setup handlers
+	mux.HandleFunc("/daemon", makeHandler(handleDaemonCommand, http.MethodPost))
 
-	opt := ws2811.DefaultOptions
-	opt.Channels[0].Brightness = 0
-	opt.Channels[0].LedCount = *numLeds
-
-	dev, err = ws2811.MakeWS2811(&opt)
-	checkError(err)
-	checkError(dev.Init())
-	defer dev.Fini()
-
-	c := make(chan os.Signal)
-	w := make(chan int)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		w <- 1
-	}()
-
-	http.HandleFunc("/clear", handleClear)
-	fmt.Println("Listening...")
-	http.ListenAndServe(*port, nil)
-	<-w
-	fmt.Println("Goodbye!")
+	return &http.Server{
+		Addr:           *port,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
 }
 
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
+func main() {
+	log.Println("starting up...")
+
+	ctx := context.Background()
+	server := newHTTPServer()
+	defer server.Shutdown(ctx)
+	server.RegisterOnShutdown(func() {
+		log.Printf("shutting down")
+	})
+
+	log.Println("listening...")
+	err := server.ListenAndServe()
+	log.Printf("shutting down with error: %v", err)
 }
