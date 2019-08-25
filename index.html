@@ -1,0 +1,24 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Audio Reactive LED Strip</title>
+</head>
+
+<script src="js/script.js"></script>
+
+<body>
+    <select id="daemon_command">
+        <option value="" selected></option>
+        <option value="start">Start</option>
+        <option value="stop">Stop</option>
+        <option value="restart">Restart</option>
+        <option value="enable">Enable</option>
+        <option value="disable">Disable</option>
+    </select>
+    <button onclick="sendDaemonCommand()">Send command</button>
+    <div id="daemon_status">Command Status:</div>
+</body>
+</html>

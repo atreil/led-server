@@ -39,9 +39,9 @@ func handleDaemonCommand(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	cmd := exec.Command("systemctl", payload.Command, ServiceName)
-	if err := cmd.Run(); err != nil {
+	if _, err := cmd.Output(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("error running '%v': %v", cmd.Args, exitError.Stderr)
+			return fmt.Errorf("error running '%v': %v", cmd.Args, string(exitError.Stderr))
 		}
 		return fmt.Errorf("could not run command '%v': %v", cmd.Args, err)
 	}
