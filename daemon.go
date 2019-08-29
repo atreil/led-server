@@ -8,11 +8,6 @@ import (
 )
 
 const (
-	START       = "start"
-	STOP        = "stop"
-	RESTART     = "restart"
-	ENABLE      = "enable"
-	DISABLE     = "disable"
 	ServiceName = "audio-reactive-led-strip.service"
 )
 
@@ -22,6 +17,7 @@ var allowed = map[string]bool{
 	"restart": true,
 	"enable":  true,
 	"disable": true,
+	"status":  true,
 }
 
 type Request struct {
@@ -39,12 +35,16 @@ func handleDaemonCommand(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	cmd := exec.Command("systemctl", payload.Command, ServiceName)
-	if _, err := cmd.Output(); err != nil {
+	output, err := cmd.Output()
+	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			return fmt.Errorf("error running '%v': %v", cmd.Args, string(exitError.Stderr))
 		}
 		return fmt.Errorf("could not run command '%v': %v", cmd.Args, err)
 	}
 
+	if _, err := w.Write(output); err != nil {
+		return fmt.Errorf("failed to write output but command succeeded: %v", err)
+	}
 	return nil
 }
