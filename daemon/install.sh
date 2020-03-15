@@ -3,11 +3,11 @@ echo "installing ${SVC}..."
 
 systemctl is-enabled ${SVC}
 
-if [ $? -eq 0 ]
-then
-    echo "${SVC} already installed and enabled"
-    exit 0
-fi
+#if [ $? -eq 0 ]
+#then
+#    echo "${SVC} already installed and enabled"
+#    exit 0
+#fi
 
 SRC="${PWD}/${SVC}"
 DEST="/lib/systemd/system/"
