@@ -1,3 +1,23 @@
+#!/bin/bash
+echo "building binary"
+
+pushd ../
+./build
+BUILDEXC=$?
+popd
+
+if [ ${BUILDEXC} -ne 0 ]
+then
+	echo "Failed to build binary"
+	exit 1
+fi
+
+#BINARYSRC="../server"
+#BINARYDES="/usr/local/sbin"
+
+#echo "copying ${BINARYSRC} to ${BINARYDES}"
+#cp ${BINARYSRC} ${BINARYDES}
+
 SVC=audio-reactive-led-strip-server.service
 echo "installing ${SVC}..."
 
@@ -36,4 +56,12 @@ then
 fi
 
 echo "successfully installed ${SVC}"
+
+systemctl daemon-reload
+if [ $? -ne 0 ]
+then
+	echo "failed to reload daemon"
+	exit 1
+fi
+
 exit 0
