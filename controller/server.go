@@ -47,7 +47,7 @@ func makeHandleDeviceCommand(dev *Device) func(http.ResponseWriter, *http.Reques
 			return fmt.Errorf("failed to unmarshal payload: %v", err)
 		}
 
-		if payload.Command != strings.ToLower("stop") {
+		if payload.Command != strings.ToLower("clear") {
 			return fmt.Errorf("expected command 'stop' but got %q", payload.Command)
 		}
 

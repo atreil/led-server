@@ -26,7 +26,7 @@ func (d *Device) Clear() error {
 		return fmt.Errorf("error setting leds: %s", err)
 	}
 
-	return nil
+	return d.dev.Render()
 }
 
 func NewDevice() (*Device, func() error, error) {
