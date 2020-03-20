@@ -116,3 +116,11 @@ When in doubt, follow https://www.raspberrypi.org/documentation/remote-access/ss
     ```
 
 1. Follow the steps at https://github.com/scottlawsonbc/audio-reactive-led-strip#installation-for-raspberry-pi.
+
+# Setting up remote server
+1. You will need golang. Check the latest versions at https://golang.org/dl/.
+
+    ```
+    sudo apt-get install golang
+    ```
+
