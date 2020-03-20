@@ -1,0 +1,12 @@
+[Unit]
+Description=Audio Reactive LED Strip Service
+# TODO figure out which services to depend on
+Wants=alsa-state.service
+After=alsa-state.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/pi/led-server/audio-reactive-led-strip/python/visualization.py
+
+[Install]
+WantedBy=multi-user.target 
