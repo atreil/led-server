@@ -10,17 +10,31 @@
 <script src="js/script.js"></script>
 
 <body>
-    <select id="daemon_command">
-        <option value="" selected></option>
-        <option value="start">Start</option>
-        <option value="stop">Stop</option>
-        <option value="restart">Restart</option>
-        <option value="enable">Enable</option>
-        <option value="disable">Disable</option>
-        <option value="status">Status</option>
-        <option value="clear">Clear</option>
-    </select>
-    <button onclick="sendDaemonCommand()">Send command</button>
-    <div id="daemon_status">Command Status:</div>
+  <h1>Daemon</h1>
+  <select id="daemon_command">
+    <option value="" selected></option>
+    <option value="start">Start</option>
+    <option value="stop">Stop</option>
+    <option value="restart">Restart</option>
+    <option value="enable">Enable</option>
+    <option value="disable">Disable</option>
+    <option value="status">Status</option>
+  </select>
+  <button onclick="sendCommand('daemon')">Send command</button>
+  <div id="daemon_status">Command Status:</div>
+
+  <br>
+
+  <h1>Device</h1>
+  <select id="device_command">
+    <option value="" selected></option>
+    <option value="clear">Clear</option>
+  </select>
+  <button onclick="sendCommand('device')">Send command</button>
+  <div id="device_status">Command Status:</div>
+
+  <br>
+  <button onclick="stopAndClear()">Stop and Clear</button>
+  <div id="stop_and_clear">Command Status:</div>
 </body>
 </html>
