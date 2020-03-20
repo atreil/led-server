@@ -17,7 +17,11 @@ function sendDaemonCommand() {
         resultBox.innerHTML = `${statusPrefix}${this.status} (${this.statusText}) ${this.responseText}`
     };
 
-    xhttp.open("POST", "/daemon")
+    if (command == "clear") {
+        xhttp.open("POST", "/device")
+    } else {
+        xhttp.open("POST", "/daemon")
+    }
     xhttp.setRequestHeader("Content-Type", "application/json")
     xhttp.send(`{"Command": "${command}"}`)
 }
