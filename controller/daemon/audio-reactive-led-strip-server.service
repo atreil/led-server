@@ -1,0 +1,13 @@
+[Unit]
+Description=Audio Reactive LED Strip Service Server
+# TODO figure out which services to depend on
+Wants=alsa-state.service audio-reactive-led-strip.service
+After=alsa-state.service audio-reactive-led-strip.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/led-server/led-server/webrt
+ExecStart=/home/pi/led-server/led-server/webrt/server
+
+[Install]
+WantedBy=multi-user.target
