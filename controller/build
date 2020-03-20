@@ -1,2 +1,2 @@
 #!/bin/bash
-env GOOS=linux GOARCH=arm GOARM=5 go build -o webrt/server server.go daemon.go
+env GOOS=linux GOARCH=arm GOARM=5 go build -o webrt/server server.go daemon.go device.go
