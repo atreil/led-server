@@ -6,8 +6,8 @@ After=alsa-state.service audio-reactive-led-strip.service
 
 [Service]
 Type=simple
-WorkingDirectory=/home/pi/led-server/led-server/webrt
-ExecStart=/home/pi/led-server/led-server/webrt/server
+WorkingDirectory=/home/pi/led-server/led-server/controller/webrt
+ExecStart=/home/pi/led-server/led-server/controller/webrt/server
 
 [Install]
 WantedBy=multi-user.target
