@@ -8,7 +8,7 @@ When in doubt, follow https://www.raspberrypi.org/documentation/installation/ins
 1. In a terminal window, write the image to the card with the command below, making sure you replace the input file `if=` argument with the path to your `.img` file, and the `/dev/sdX` in the output file `of=` argument with the correct device name. This is very important, as you will lose all the data on the hard drive if you provide the wrong device name. Make sure the device name is the name of the whole SD card as described above, not just a partition. For example: `sdd`, not `sdds1` or `sddp1`; `mmcblk0`, not `mmcblk0p1`.
 
     ```
-    sudo dd bs=4M if=2020-02-13-raspbian-buster.img of=/dev/sdX conv=fsync
+    sudo dd bs=4M if=2020-02-13-raspbian-buster-lite.img of=/dev/sdX conv=fsync
     ```
 
 1. This may take some time. You can check the status in a separate terminal by running `sudo kill -USR1 $(pgrep ^dd)`.
@@ -95,15 +95,10 @@ When in doubt, follow https://www.raspberrypi.org/documentation/remote-access/ss
     sudo apt-get install git
     ```
 
-1. Install python tools
+1. Install python tools. You could use `pip` but in my experience `pip` can bungle the science package installations.
 
     ```
-    sudo apt-get install python3-pip
-    sudo pip3 install numpy
-    sudo pip3 install scipy # 'sudo pip3 install scipy --extra-index-url https://www.piwheels.org/simple' is quicker
-    pip3 install pyqtgraph
-    sudo apt-get install portaudio19-dev python-pyaudio python3-pyaudio
-    sudo apt-get install libatlas-base-dev
+    sudo apt-get install python3-numpy python3-scipy python-pyqtgraph portaudio19-dev python-pyaudio python3-pyaudio libatlas-base-dev
     ```
 
 1. Download the LED project
@@ -122,5 +117,6 @@ When in doubt, follow https://www.raspberrypi.org/documentation/remote-access/ss
 
     ```
     sudo apt-get install golang
+    git clone https://github.com/atreil/led-server.git
     ```
 
