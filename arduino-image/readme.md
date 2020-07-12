@@ -112,6 +112,45 @@ When in doubt, follow https://www.raspberrypi.org/documentation/remote-access/ss
 
 1. Follow the steps at https://github.com/scottlawsonbc/audio-reactive-led-strip#installation-for-raspberry-pi.
 
+1. In particular:
+
+    Create/edit `/etc/asound.conf`
+    ```
+    sudo nano /etc/asound.conf
+    ```
+    Set the file to the following text
+    ```
+    pcm.!default {
+        type hw
+        card 1
+    }
+    ctl.!default {
+        type hw
+        card 1
+    }
+    ```
+
+    Next, set the USB device to as the default device by editing `/usr/share/alsa/alsa.conf`
+    ```
+    sudo nano /usr/share/alsa/alsa.conf:
+    ```
+    Change
+    ```
+    defaults.ctl.card 0
+    defaults.pcm.card 0
+    ```
+    To
+    ```
+    defaults.ctl.card 1
+    defaults.pcm.card 1
+    ````
+
+## Test the LED strip
+1. cd rpi_ws281x/python/examples
+1. sudo nano strandtest.py
+1. Configure the options at the top of the file. Enable logic inverting if you are using an inverting logic-level converter. Set the correct GPIO pin and number of pixels for the LED strip. You will likely need a logic-level converter to convert the Raspberry Pi's 3.3V logic to the 5V logic used by the ws2812b LED strip.
+1. Run example with 'sudo python strandtest.py'
+
 # Setting up remote server
 1. You will need golang. Check the latest versions at https://golang.org/dl/.
 

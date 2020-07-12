@@ -10,6 +10,8 @@ from glob import glob
 
 EDITOR = os.environ.get('EDITOR','vi')
 
+Args = collections.namedtuple('Args', 'partition mount_path')
+
 ############ HELPER METHODS ############
 def wrap_cmd(args):
     print('running \'%s\'' % args)
@@ -113,6 +115,24 @@ def setup_wireless(args):
     append_file(wpa_supplicant, instructions)
     wrap_cmd([EDITOR, wpa_supplicant])
     wrap_cmd(['sed', '-i', '/^;;/d', wpa_supplicant])
+
+def fix_block(args):
+    root_dir = check_mount(args.partition, args.mount_path)
+    kill_dir = os.path.normpath(os.path.join(root_dir, 'var/lib/systemd/rfkill/'))
+    files = glob(os.path.join(kill_dir, '*:wlan'))
+    print(root_dir)
+    print('overwriting files %s' % files)
+    for file in files:
+        with open(file, 'w') as f:
+            f.write('0\n')
+
+def setup_image(args):
+    boot_args = Args(partition=args.boot_partition, mount_path=args.boot_mount_path)
+    root_args = Args(partition=args.root_partition, mount_path=args.root_mount_path)
+    setup_ssh(boot_args)
+    setup_wireless(root_args)
+    fix_block(root_args)
+
 ########################################
 
 parser = argparse.ArgumentParser(description='Prepare an SD Card with Raspbian')
@@ -156,6 +176,40 @@ setupwireless_args.add_argument(
     type=str,
     help='Mount path to the rootfs partition.')
 setupwireless_args.set_defaults(func=setup_wireless)
+
+fixblock_args = subparsers.add_parser(
+    name='fixblock',
+    description='Removes the WiFi soft-block from Raspberry Pi')
+fixblock_args.add_argument(
+    'partition',
+    type=str,
+    help='Device path to the rootfs partition.')
+fixblock_args.add_argument(
+    'mount_path',
+    type=str,
+    help='Mount path to the rootfs partition.')
+fixblock_args.set_defaults(func=fix_block)
+
+setupimage_args = subparsers.add_parser(
+    name='setupimage',
+    description='Sets up image by running setupssh, setupwireless, fixblock')
+setupimage_args.add_argument(
+    'root_partition',
+    type=str,
+    help='Device path to the rootfs partition.')
+setupimage_args.add_argument(
+    'root_mount_path',
+    type=str,
+    help='Mount path to the rootfs partition.')
+setupimage_args.add_argument(
+    'boot_partition',
+    type=str,
+    help='Device path to the boot partition.')
+setupimage_args.add_argument(
+    'boot_mount_path',
+    type=str,
+    help='Mount path to the boot partition.')
+setupimage_args.set_defaults(func=setup_image)
 
 def main():
     args = parser.parse_args()

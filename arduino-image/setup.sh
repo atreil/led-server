@@ -1,0 +1,1 @@
+sudo ssh -t pi@raspberrypi.local "$(< ./setup_commands.sh)"

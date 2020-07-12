@@ -1,4 +1,5 @@
 #!/bin/bash
 cp ../../rpi_ws281x/*.h /usr/local/include
 cp ../../rpi_ws281x/*.a /usr/lib
+go get github.com/rpi-ws281x/rpi-ws281x-go
 env GOOS=linux GOARCH=arm GOARM=5 go build -o webrt/server server.go daemon.go device.go
