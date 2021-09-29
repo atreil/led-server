@@ -1,1 +1,1 @@
-sudo ssh -t pi@raspberrypi.local "$(< ./setup_commands.sh)"
+sudo ssh -t pi@raspberrypi.local CONTINUE=${CONTINUE:-0} "$(< ./setup_commands.sh)"

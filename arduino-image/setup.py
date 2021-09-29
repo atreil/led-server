@@ -92,13 +92,11 @@ def write_image(args):
     wrap_cmd(['dd', 'bs=4M', 'if=%s' % img_path, 'of=%s' % dev, 'conv=fsync',
               'status=progress'])
 
-def setup_ssh(args):
-    boot_dir = check_mount(args.partition, args.mount_path)
-    wrap_cmd(['touch', os.path.join(boot_dir, 'ssh')])
+def setup_ssh(mount_path):
+    wrap_cmd(['touch', os.path.join(mount_path, 'ssh')])
 
-def setup_wireless(args, ssid, psk):
-    root_dir = check_mount(args.partition, args.mount_path)
-    wpa_supplicant = os.path.normpath(os.path.join(root_dir, 'etc/wpa_supplicant/wpa_supplicant.conf'))
+def setup_wireless(mount_path, ssid, psk):
+    wpa_supplicant = os.path.normpath(os.path.join(mount_path, 'etc/wpa_supplicant/wpa_supplicant.conf'))
 
     if not ssid or not psk:
         instructions = (';; 1. Follow all of the steps.\n'
@@ -136,19 +134,16 @@ network={
 }
 """ % (ssid, psk))
 
-def fix_block(args):
-    root_dir = check_mount(args.partition, args.mount_path)
-    kill_dir = os.path.normpath(os.path.join(root_dir, 'var/lib/systemd/rfkill/'))
+def fix_block(mount_path):
+    kill_dir = os.path.normpath(os.path.join(mount_path, 'var/lib/systemd/rfkill/'))
     files = glob(os.path.join(kill_dir, '*:wlan'))
-    print(root_dir)
     print('overwriting files %s' % files)
     for file in files:
         with open(file, 'w') as f:
             f.write('0\n')
 
-def set_default_audio_dev(args):
-    root_dir = check_mount(args.partition, args.mount_path)
-    conf_path = os.path.normpath(os.path.join(root_dir, 'etc/asound.conf'))
+def set_default_audio_dev(mount_path):
+    conf_path = os.path.normpath(os.path.join(mount_path, 'etc/asound.conf'))
     print('overwritting file %s' % conf_path)
     with open(conf_path, 'w+') as f:
         f.write(
@@ -162,20 +157,17 @@ ctl.!default {
 }
 """)
 
-def setup_usb_dev(args):
-    root_dir = check_mount(args.partition, args.mount_path)
-    conf_path = os.path.normpath(os.path.join(root_dir, 'usr/share/alsa/alsa.conf'))
+def setup_usb_dev(mount_path):
+    conf_path = os.path.normpath(os.path.join(mount_path, 'usr/share/alsa/alsa.conf'))
     wrap_cmd(['sed', '-i', '/defaults.ctl.card 0/c\defaults.ctl.card 1', conf_path])
     wrap_cmd(['sed', '-i', '/defaults.pcm.card 0/c\defaults.pcm.card 1', conf_path])
 
 def setup_image(args):
-    boot_args = Args(partition=args.boot_partition, mount_path=args.boot_mount_path)
-    root_args = Args(partition=args.root_partition, mount_path=args.root_mount_path)
-    setup_ssh(boot_args)
-    setup_wireless(root_args, args.ssid, args.psk)
-    fix_block(root_args)
-    set_default_audio_dev(root_args)
-    setup_usb_dev(root_args)
+    setup_ssh(args.boot_mount_path)
+    setup_wireless(args.root_mount_path, args.ssid, args.psk)
+    fix_block(args.root_mount_path)
+    set_default_audio_dev(args.root_mount_path)
+    setup_usb_dev(args.root_mount_path)
 
 ########################################
 
@@ -203,23 +195,11 @@ setupimage_args = subparsers.add_parser(
     name='setupimage',
     description='Sets up image by running setupssh, setupwireless, fixblock. Note that the boot partition will be the smaller than the root partition.')
 setupimage_args.add_argument(
-    '--root_partition',
-    dest='root_partition',
-    type=str,
-    required=True,
-    help='Device path to the rootfs partition.')
-setupimage_args.add_argument(
     '--root_mount_path',
     dest='root_mount_path',
     type=str,
     required=True,
     help='Mount path to the rootfs partition.')
-setupimage_args.add_argument(
-    '--boot_partition',
-    dest='boot_partition',
-    type=str,
-    required=True,
-    help='Device path to the boot partition.')
 setupimage_args.add_argument(
     '--boot_mount_path',
     dest='boot_mount_path',
