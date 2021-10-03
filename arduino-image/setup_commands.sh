@@ -1,4 +1,4 @@
-# we apparently need a comment at the top
+# Top line should be commented
 if [ ${CONTINUE} -le 0 ]; then
     sudo apt-get update
     sudo apt-get install git python3-numpy python3-scipy python3-pyaudio build-essential python-dev scons swig vim python3-pip golang

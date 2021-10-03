@@ -5,12 +5,14 @@ import os
 import re
 import subprocess
 import sys
+import getpass
 
 from glob import glob
 
 EDITOR = os.environ.get('EDITOR','vi')
 
 Args = collections.namedtuple('Args', 'partition mount_path')
+Partitions = collections.namedtuple('Partitions', 'boot root')
 
 ############ HELPER METHODS ############
 def wrap_cmd(args):
@@ -63,24 +65,37 @@ def append_file(file, text):
     with open(file, 'a') as f:
         f.write(text)
 
-def check_mount(dev, mnt):
+def check_mount(dev: str, mnt: str):
+    """Runs checks and then mounts a device. Will create the directory."""
     mnt = resolve_path(mnt)
+    if is_mounted(dev):
+        raise Exception('\'%s\' is already mounted at %s' % (dev, mnt))
     if os.path.isfile(mnt):
-        raise Exception('\'%s\' is a file' % mnt)
-    if not os.path.isdir(mnt):
-        os.mkdir(mnt)
-    if not is_mounted(dev):
-        wrap_cmd(['mount', dev, mnt])
-    return mnt
+        raise Exception('%s should be a directory. found file' % mnt)
+    if not os.path.exists(mnt):
+        os.makedirs(mnt, exist_ok=True)
+    wrap_cmd(['mount', dev, mnt])
 
-########################################
+def resolve_dev_partitions(dev_pfx: str) -> Partitions:
+    """Resolves the root and boot partitions from the top-level device."""
+    args = ['lsblk', dev_pfx, '-rbp', '-o', 'NAME,SIZE']
+    print('running \'%s\'' % args)
+    output = subprocess.check_output(args)
+    print('got output %s', output)
+    dev_lines = [line.split(' ') for line in output.decode('utf-8').split('\n') if line.startswith(dev_pfx)]
+    partition_lines = [dev_line for dev_line in dev_lines if dev_line[0] != dev_pfx]
+    if len(partition_lines) != 2:
+        raise Exception('only expected to find 2 devices. found %s' % partition_lines)
+    root = partition_lines[0]
+    boot = partition_lines[1]
+    if int(boot[1]) > int(root[1]):
+        tmp = boot
+        boot = root
+        root = tmp
+    return Partitions(boot=boot[0], root=root[0])
 
-############# Commands #################
-def write_image(args):
-    dev = args.dev
-    img_path = args.image
-    check_file(img_path)
-
+def unmount_device(dev):
+    """Unmount the devivce."""
     to_unmount = [part for part in glob('%s?*' % dev) if is_mounted(part)]
 
     if len(to_unmount) != 0:
@@ -88,9 +103,23 @@ def write_image(args):
                     'Proceed' % dev):
                 raise Exception('User canceled unmount operation')
         wrap_cmd(['umount'] + to_unmount)
-    print('partions %s are unmounted' % glob('%s?*' % dev))
+        print('partions %s are unmounted' % glob('%s?*' % dev))
+
+########################################
+
+############# Commands #################
+
+def write_image(dev: str, img_path: str) -> None :
+    """Format the SD card device with a specific image.
+    
+    Args:
+    dev - The top-level name of the device of the SD card. Must be unmounted.
+    img_path - Path to the image file to format the SD card with.
+    """
+    check_file(img_path)
     wrap_cmd(['dd', 'bs=4M', 'if=%s' % img_path, 'of=%s' % dev, 'conv=fsync',
               'status=progress'])
+    wrap_cmd(['sync'])
 
 def setup_ssh(mount_path):
     wrap_cmd(['touch', os.path.join(mount_path, 'ssh')])
@@ -163,62 +192,51 @@ def setup_usb_dev(mount_path):
     wrap_cmd(['sed', '-i', '/defaults.pcm.card 0/c\defaults.pcm.card 1', conf_path])
 
 def setup_image(args):
-    setup_ssh(args.boot_mount_path)
-    setup_wireless(args.root_mount_path, args.ssid, args.psk)
-    fix_block(args.root_mount_path)
-    set_default_audio_dev(args.root_mount_path)
-    setup_usb_dev(args.root_mount_path)
+    unmount_device(args.dev)
+    write_image(args.dev, args.image)
+    parts = resolve_dev_partitions(args.dev)
+    boot_mount_path = '/media/%s/bootfs' % getpass.getuser()
+    root_mount_path = '/media/%s/rootfs' % getpass.getuser()
+    check_mount(parts.boot, boot_mount_path)
+    check_mount(parts.root, root_mount_path)
+
+    setup_ssh(boot_mount_path)
+    setup_wireless(root_mount_path, args.ssid, args.psk)
+    fix_block(root_mount_path)
+    set_default_audio_dev(root_mount_path)
+    setup_usb_dev(root_mount_path)
+    unmount_device(args.dev)
+
+    print('SD card is ready')
 
 ########################################
 
-parser = argparse.ArgumentParser(description='Prepare an SD Card with Raspbian')
-subparsers = parser.add_subparsers()
-
-writeimage_args = subparsers.add_parser(
-    name='writeimage',
-    description='Writes Raspbian image to an SD card.')
-writeimage_args.add_argument(
+parser = argparse.ArgumentParser(description='Prepare an SD Card with Raspbian.')
+parser.add_argument(
     '--dev',
     dest='dev',
     type=str,
     required=True,
-    help='Device path of the SD Card (looks like /dev/sd* - may be a common prefix).')
-writeimage_args.add_argument(
+    help='The top-level name of the device for the SD card.')
+parser.add_argument(
     '--image',
     dest='image',
     type=str,
     required=True,
     help='Path to the Raspbian image.')
-writeimage_args.set_defaults(func=write_image)
-
-setupimage_args = subparsers.add_parser(
-    name='setupimage',
-    description='Sets up image by running setupssh, setupwireless, fixblock. Note that the boot partition will be the smaller than the root partition.')
-setupimage_args.add_argument(
-    '--root_mount_path',
-    dest='root_mount_path',
-    type=str,
-    required=True,
-    help='Mount path to the rootfs partition.')
-setupimage_args.add_argument(
-    '--boot_mount_path',
-    dest='boot_mount_path',
-    type=str,
-    required=True,
-    help='Mount path to the boot partition.')
-setupimage_args.add_argument(
+parser.add_argument(
     '--ssid',
     dest='ssid',
     type=str,
     required=False,
     help='Name of the wireless network to connect to')
-setupimage_args.add_argument(
+parser.add_argument(
     '--psk',
     dest='psk',
     type=str,
     required=False,
     help='Password to use to connect to wireless network')
-setupimage_args.set_defaults(func=setup_image)
+parser.set_defaults(func=setup_image)
 
 def main():
     args = parser.parse_args()
