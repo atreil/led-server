@@ -48,7 +48,7 @@ func makeHandleDeviceCommand(dev *Device) func(http.ResponseWriter, *http.Reques
 		}
 
 		if payload.Command != strings.ToLower("clear") {
-			return fmt.Errorf("expected command 'stop' but got %q", payload.Command)
+			return fmt.Errorf("expected command 'clear' but got %q", payload.Command)
 		}
 
 		return dev.Clear()

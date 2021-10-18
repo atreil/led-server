@@ -46,3 +46,27 @@ function stopAndClear() {
     clear.setRequestHeader("Content-Type", "application/json")
     clear.send(`{"Command": "clear"}`)
 }
+
+function getElementValue(id) {
+    return document.getElementById(id).value
+}
+
+function sendLED() {
+    var resultBox = document.getElementById("send_led_status")
+    var statusPrefix = "Status: "
+    var req = new XMLHttpRequest()
+    req.onreadystatechange = function() {
+        resultBox.innerHTML = `${statusPrefix}${this.status} (${this.statusText}) ${this.responseText}`
+    };
+
+    req.open("POST", "/led")
+    req.setRequestHeader("Content-Type", "application/json")
+    var data = {
+        "N_FFT_BINS": getElementValue("led_n_fft_bins"),
+        "MIN_FREQUENCY": getElementValue("led_min_fequency"),
+        "MAX_FREQUENCY": getElementValue("led_max_frequency"),
+        "SPECTRUM_BASE": getElementValue("led_spectrum_base"),
+        "VISUALIZATION_TYPE": getElementValue("led_visualization_type"),
+    }
+    req.send(JSON.stringify(data))
+}

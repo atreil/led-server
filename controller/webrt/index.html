@@ -36,5 +36,32 @@
   <br>
   <button onclick="stopAndClear()">Stop and Clear</button>
   <div id="stop_and_clear">Command Status:</div>
+
+  <br>
+  <h1>LED</h1>
+  <label for="led_visualization_type">Visualization Type:</label>
+  <select id="led_visualization_type">
+    <option value="" selected></option>
+    <option value="0">Spectrum</option>
+    <option value="1">Spectrum Base</option>
+    <option value="2">Energy</option>
+    <option value="3">Scroll</option>
+  </select>
+  <br>
+  <label for="led_min_frequency">Min frequency:</label>
+  <input type="number" id="led_min_frequency">
+  <br>
+  <label for="led_max_frequency">Max frequency:</label>
+  <input type="number" id="led_max_frequency">
+  <br>
+  <label for="led_n_fft_bins">FFT Bins:</label>
+  <input type="number" id="led_n_fft_bins">
+  <br>
+  <label for="led_spectrum_base">Spectrum Base Color</label>
+  <input type="color" id="led_spectrum_base">
+  <br>
+  <button onclick="sendLED()">Send command</button>
+  <br>
+  <div id="send_led_status">Status:</div>
 </body>
 </html>
