@@ -14,6 +14,7 @@ import (
 type Stream interface {
 	io.ReadWriteSeeker
 	Truncate(size int64) error
+	Sync() error
 }
 
 type Config struct {
@@ -83,7 +84,11 @@ func (c *Config) write(data []byte) error {
 		return fmt.Errorf("failed to write data at path '%s': %v", c.configPath, err)
 	}
 
-	return c.configPathStream.Truncate(int64(n))
+	if err := c.configPathStream.Truncate(int64(n)); err != nil {
+		return fmt.Errorf("failed to truncate file (%v): %v", c.configPath, err)
+	}
+
+	return c.configPathStream.Sync()
 }
 
 func (c *Config) makeHandleUpdateRequest() func(http.ResponseWriter, *http.Request) error {

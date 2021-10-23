@@ -46,6 +46,10 @@ func (f *FakeStream) Truncate(size int64) error {
 	return nil
 }
 
+func (f *FakeStream) Sync() error {
+	return nil
+}
+
 type FakeDaemon struct {
 	requestQ []Request
 }
