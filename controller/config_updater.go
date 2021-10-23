@@ -80,7 +80,9 @@ func (c *Config) write(data []byte) error {
 
 	// TODO: handle case where data was partially written
 	n, err := c.configPathStream.Write(data)
-	if err != nil {
+	if err == io.ErrShortWrite {
+		return fmt.Errorf("failed to update config because of: %v. please try again", err)
+	} else if err != nil {
 		return fmt.Errorf("failed to write data at path '%s': %v", c.configPath, err)
 	}
 
