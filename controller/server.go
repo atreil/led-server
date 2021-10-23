@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var configPath = flag.String("config_path", "", "Path to the config for the led visualizer")
+
 type handlerFunc func(http.ResponseWriter, *http.Request) error
 
 func makeHandler(fn handlerFunc, protocols ...string) func(http.ResponseWriter, *http.Request) {
@@ -57,7 +59,7 @@ func makeHandleDeviceCommand(dev *Device) func(http.ResponseWriter, *http.Reques
 
 var port = flag.String("port", ":8080", "The port")
 
-func newHTTPServer(dev *Device) (*http.Server, error) {
+func newHTTPServer(dev *Device, daemon *DefaultDaemon, config *Config) (*http.Server, error) {
 	mux := http.NewServeMux()
 
 	// Setup handlers
@@ -67,8 +69,9 @@ func newHTTPServer(dev *Device) (*http.Server, error) {
 	}
 	log.Printf("setting file server root: %v", root)
 	mux.Handle("/", http.FileServer(http.Dir(root)))
-	mux.HandleFunc("/daemon", makeHandler(handleDaemonCommand, http.MethodPost))
+	mux.HandleFunc("/daemon", makeHandler(daemon.MakeHandleDaemonCommandRequest(), http.MethodPost))
 	mux.HandleFunc("/device", makeHandler(makeHandleDeviceCommand(dev), http.MethodPost))
+	mux.HandleFunc("/led", makeHandler(config.makeHandleUpdateRequest(), http.MethodPost))
 
 	return &http.Server{
 		Addr:           *port,
@@ -84,13 +87,24 @@ func main() {
 
 	ctx := context.Background()
 
+	if *configPath == "" {
+		log.Panic("flag '--config_path' must be set")
+	}
+
+	daemon := &DefaultDaemon{}
+
+	config, err := NewConfig(*configPath, daemon)
+	if err != nil {
+		log.Panicf("failed to start LED package: %v", err)
+	}
+
 	ws2811Dev, cleanup, err := NewDevice()
 	if err != nil {
 		log.Panicf("failed to intialize ws2811 device: %v", err)
 	}
 	defer cleanup()
 
-	server, err := newHTTPServer(ws2811Dev)
+	server, err := newHTTPServer(ws2811Dev, daemon, config)
 	if err != nil {
 		log.Panicf("failed to start up http server: %v", err)
 	}

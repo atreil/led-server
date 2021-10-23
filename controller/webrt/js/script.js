@@ -51,6 +51,23 @@ function getElementValue(id) {
     return document.getElementById(id).value
 }
 
+function getElementValueAsOptionalInt(field) {
+    var fieldVal = getElementValue(field)
+    if (fieldVal === "") {
+        return null
+    }
+    return parseInt(fieldVal, 10)
+}
+
+function getElementValueAsOptionalColor(field) {
+    var fieldVal = getElementValue(field)
+    if (fieldVal === "") {
+        return null
+    }
+    // colors have the form #rrggbb
+    return [parseInt(fieldVal.slice(1, 3), 16), parseInt(fieldVal.slice(3, 5), 16), parseInt(fieldVal.slice(5, 7), 16)]
+}
+
 function sendLED() {
     var resultBox = document.getElementById("send_led_status")
     var statusPrefix = "Status: "
@@ -62,11 +79,11 @@ function sendLED() {
     req.open("POST", "/led")
     req.setRequestHeader("Content-Type", "application/json")
     var data = {
-        "N_FFT_BINS": getElementValue("led_n_fft_bins"),
-        "MIN_FREQUENCY": getElementValue("led_min_fequency"),
-        "MAX_FREQUENCY": getElementValue("led_max_frequency"),
-        "SPECTRUM_BASE": getElementValue("led_spectrum_base"),
-        "VISUALIZATION_TYPE": getElementValue("led_visualization_type"),
+        "N_FFT_BINS": getElementValueAsOptionalInt("led_n_fft_bins"),
+        "MIN_FREQUENCY": getElementValueAsOptionalInt("led_min_frequency"),
+        "MAX_FREQUENCY": getElementValueAsOptionalInt("led_max_frequency"),
+        "SPECTRUM_BASE": getElementValueAsOptionalColor("led_spectrum_base"),
+        "VISUALIZATION_TYPE": getElementValueAsOptionalInt("led_visualization_type"),
     }
     req.send(JSON.stringify(data))
 }
