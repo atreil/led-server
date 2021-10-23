@@ -85,6 +85,7 @@ func newHTTPServer(dev *Device, daemon *DefaultDaemon, config *Config) (*http.Se
 func main() {
 	log.Println("starting up...")
 
+	flag.Parse()
 	ctx := context.Background()
 
 	if *configPath == "" {
