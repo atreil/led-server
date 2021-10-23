@@ -47,16 +47,8 @@ func NewConfig(configPath string, d Daemon) (*Config, error) {
 	}, nil
 }
 
-func (c *Config) Update(reqRaw []byte) error {
-	req := &UpdateRequest{}
-	err := json.Unmarshal(reqRaw, req)
-
-	if err != nil {
-		log.Printf("failed to unmarshal payload %s: %v", string(reqRaw), err)
-		return fmt.Errorf("failed to unmarshal payload: %v", err)
-	}
-
-	reqRaw, err = json.Marshal(req)
+func (c *Config) Update(req *UpdateRequest) error {
+	reqRaw, err := json.Marshal(req)
 	if err != nil {
 		log.Printf("failed to marshal payload %v: %v", req, err)
 		return fmt.Errorf("failed to marshal payload: %v", err)
@@ -72,7 +64,7 @@ func (c *Config) Update(reqRaw []byte) error {
 
 	err = c.write(reqRaw)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to update config: %v", err)
 	}
 
 	_, err = c.d.HandleDaemonCommand(Request{"start"})
@@ -96,11 +88,10 @@ func (c *Config) write(data []byte) error {
 
 func (c *Config) makeHandleUpdateRequest() func(http.ResponseWriter, *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		req := make([]byte, r.ContentLength)
-		_, err := r.Body.Read(req)
-		if err != nil {
+		payload := &UpdateRequest{}
+		if err := json.NewDecoder(r.Body).Decode(payload); err != nil {
 			return err
 		}
-		return c.Update(req)
+		return c.Update(payload)
 	}
 }

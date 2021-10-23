@@ -78,7 +78,7 @@ func TestConfig(t *testing.T) {
 		d:                fd,
 	}
 
-	wantData := UpdateRequest{
+	wantData := &UpdateRequest{
 		N_FFT_BINS: ptrInt(1),
 	}
 	wantDataRaw, err := json.Marshal(wantData)
@@ -86,7 +86,7 @@ func TestConfig(t *testing.T) {
 		t.Fatalf("setup failed marshalling data: %v", err)
 	}
 
-	if err := c.Update(wantDataRaw); err != nil {
+	if err := c.Update(wantData); err != nil {
 		t.Errorf("Update(%s) returned an unexpected error: %v", wantDataRaw, err)
 	}
 
