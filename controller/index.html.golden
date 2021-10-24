@@ -25,8 +25,8 @@
     <label for="led_spectrum_base">Spectrum Base Color</label>
     <input type="color" id="led_spectrum_base">
   </div>
-  <div id="led_advanced_opt">
-    <h1>Advance Options</h1>
+  <h2>Advance Options <a href="#" onclick="hideAdvancedOpt()">(Expand)</a></h2>
+  <div id="led_advanced_opt" hidden>
 
     <div id="led_min_frequency_opt">
       <label for="led_min_frequency">Min frequency:</label>

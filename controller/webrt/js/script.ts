@@ -131,3 +131,8 @@ function sendLED() {
     }
     req.send(JSON.stringify(data))
 }
+
+function hideAdvancedOpt() {
+    var advancedOpt = document.getElementById("led_advanced_opt")
+    advancedOpt.hidden = !advancedOpt.hidden
+}
