@@ -13,7 +13,7 @@
   <h1>LED</h1>
   <div id="led_visualization_type_opt">
     <label for="led_visualization_type">Visualization Type:</label>
-    <select id="led_visualization_type">
+    <select id="led_visualization_type" onchange="ledVisualizationType()">
       <option value="" selected></option>
       <option value="0">Spectrum</option>
       <option value="1">Spectrum Base</option>
@@ -27,12 +27,12 @@
   </div>
   <div id="led_advanced_opt">
     <h1>Advance Options</h1>
-    {{range $opt := .LedOpts}}
+{{range $opt := .LedOpts}}
     <div id="{{$opt.Id}}_opt">
       <label for="{{$opt.Id}}">{{$opt.Name}}</label>
       <input type="{{$opt.Type}}" id="{{$opt.Id}}">
     </div>
-    {{end}}
+{{end}}
   </div>
   <div id="led_send_opt">
     <button onclick="sendLED()">Send command</button>

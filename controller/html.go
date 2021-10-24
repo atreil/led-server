@@ -21,7 +21,7 @@ func Serve() (string, error) {
 		return "", fmt.Errorf("failed to resolve path to 'index.go.txt': %v", err)
 	}
 
-	tmpl, err := template.New("index").ParseFiles(tmplFile)
+	tmpl, err := template.New("index.go.txt").ParseFiles(tmplFile)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template file (%s): %v", tmplFile, err)
 	}
@@ -48,7 +48,7 @@ func Serve() (string, error) {
 
 	buf := &bytes.Buffer{}
 	if err := tmpl.Execute(buf, opts); err != nil {
-		return "", fmt.Errorf("failed to execute template file with options (%v): %v", opts, err)
+		return "", fmt.Errorf("failed to execute template file with options (%+v): %v", opts, err)
 	}
 
 	return buf.String(), nil

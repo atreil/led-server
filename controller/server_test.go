@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -101,5 +103,27 @@ func TestConfig(t *testing.T) {
 	wantRequestQ := []Request{{"stop"}, {"start"}}
 	if !reflect.DeepEqual(fd.requestQ, wantRequestQ) {
 		t.Errorf("invalid order of requests (got: %v, want: %v)", fd.requestQ, wantRequestQ)
+	}
+}
+
+func TestServe(t *testing.T) {
+	goldenPath, err := filepath.Abs("index.html.golden")
+	if err != nil {
+		t.Fatalf("failed to resolve path to 'index.html.golden': %v", err)
+	}
+
+	wantBytes, err := ioutil.ReadFile(goldenPath)
+	if err != nil {
+		t.Fatalf("failed to read golden file (%v): %v", goldenPath, err)
+	}
+	want := string(wantBytes)
+
+	got, err := Serve()
+	if err != nil {
+		t.Fatalf("failed to run Serve: %v", err)
+	}
+
+	if got != want {
+		t.Errorf("unexpected diff (\ngot:\n%v\nwant:\n%v\n)", got, want)
 	}
 }
