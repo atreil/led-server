@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Audio Reactive LED Strip</title>
+</head>
+
+<script src="js/script.js"></script>
+
+<body>
+  <h1>LED</h1>
+  <div id="led_visualization_type_opt">
+    <label for="led_visualization_type">Visualization Type:</label>
+    <select id="led_visualization_type">
+      <option value="" selected></option>
+      <option value="0">Spectrum</option>
+      <option value="1">Spectrum Base</option>
+      <option value="2">Energy</option>
+      <option value="3">Scroll</option>
+    </select>
+  </div>
+  <div id="led_spectrum_base" hidden>
+    <label for="led_spectrum_base">Spectrum Base Color</label>
+    <input type="color" id="led_spectrum_base">
+  </div>
+  <div id="led_advanced_opt">
+    <h1>Advance Options</h1>
+    {{range $opt := .LedOpts}}
+    <div id="{{$opt.Id}}_opt">
+      <label for="{{$opt.Id}}">{{$opt.Name}}</label>
+      <input type="{{$opt.Type}}" id="{{$opt.Id}}">
+    </div>
+    {{end}}
+  </div>
+  <div id="led_send_opt">
+    <button onclick="sendLED()">Send command</button>
+    <div id="send_led_status">Status:</div>
+  </div>
+</body>
+</html>

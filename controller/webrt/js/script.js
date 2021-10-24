@@ -1,3 +1,6 @@
+// ==============================================
+
+// ==============================================
 function sendCommand(endpoint) {
     var commandStr = `${endpoint}_command`
     var resultStr = `${endpoint}_status`

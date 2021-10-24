@@ -57,6 +57,15 @@ func makeHandleDeviceCommand(dev *Device) func(http.ResponseWriter, *http.Reques
 	}
 }
 
+func serveIndex(w http.ResponseWriter, r *http.Request) error {
+	index, err := Serve()
+	if err != nil {
+		return err
+	}
+	w.Write([]byte(index))
+	return nil
+}
+
 var port = flag.String("port", ":8080", "The port")
 
 func newHTTPServer(dev *Device, daemon *DefaultDaemon, config *Config) (*http.Server, error) {
@@ -68,7 +77,7 @@ func newHTTPServer(dev *Device, daemon *DefaultDaemon, config *Config) (*http.Se
 		return nil, err
 	}
 	log.Printf("setting file server root: %v", root)
-	mux.Handle("/", http.FileServer(http.Dir(root)))
+	mux.HandleFunc("/", makeHandler(serveIndex, http.MethodGet))
 	mux.HandleFunc("/daemon", makeHandler(daemon.MakeHandleDaemonCommandRequest(), http.MethodPost))
 	mux.HandleFunc("/device", makeHandler(makeHandleDeviceCommand(dev), http.MethodPost))
 	mux.HandleFunc("/led", makeHandler(config.makeHandleUpdateRequest(), http.MethodPost))
