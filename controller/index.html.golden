@@ -21,7 +21,7 @@
       <option value="3">Scroll</option>
     </select>
   </div>
-  <div id="led_spectrum_base" hidden>
+  <div id="led_spectrum_base_opt" hidden>
     <label for="led_spectrum_base">Spectrum Base Color</label>
     <input type="color" id="led_spectrum_base">
   </div>

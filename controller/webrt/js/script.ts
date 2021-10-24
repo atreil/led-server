@@ -82,10 +82,52 @@
 
 function ledVisualizationType() {
     var select = document.getElementById("led_visualization_type") as HTMLSelectElement
-    var spectrumBaseInput = document.getElementById("led_spectrum_base")
+    var spectrumBaseInput = document.getElementById("led_spectrum_base_opt")
     if (select.value === "1") {
         spectrumBaseInput.hidden = false
     } else {
         spectrumBaseInput.hidden = true
     }
+}
+
+function getSelectInputValue(id: string): string {
+    var input = document.getElementById(id) as HTMLSelectElement
+    return input.value
+}
+
+function getSelectInputValueAsInt(field: string): number | null {
+    var fieldVal = getSelectInputValue(field)
+    if (fieldVal === "" || fieldVal == null) {
+        return null
+    }
+    return parseInt(fieldVal, 10)
+}
+
+function getSelectInputValueAsColor(field: string): number[] | null {
+    var fieldVal = getSelectInputValue(field)
+    if (fieldVal === "" || fieldVal == null) {
+        return null
+    }
+    // colors have the form #rrggbb
+    return [parseInt(fieldVal.slice(1, 3), 16), parseInt(fieldVal.slice(3, 5), 16), parseInt(fieldVal.slice(5, 7), 16)]
+}
+
+function sendLED() {
+    var resultBox = document.getElementById("send_led_status")
+    var statusPrefix = "Status: "
+    var req = new XMLHttpRequest()
+    req.onreadystatechange = function() {
+        resultBox.innerHTML = `${statusPrefix}${this.status} (${this.statusText}) ${this.responseText}`
+    };
+
+    req.open("POST", "/led")
+    req.setRequestHeader("Content-Type", "application/json")
+    var data = {
+        "N_FFT_BINS": getSelectInputValueAsInt("led_n_fft_bins"),
+        "MIN_FREQUENCY": getSelectInputValueAsInt("led_min_frequency"),
+        "MAX_FREQUENCY": getSelectInputValueAsInt("led_max_frequency"),
+        "SPECTRUM_BASE": getSelectInputValueAsColor("led_spectrum_base"),
+        "VISUALIZATION_TYPE": getSelectInputValueAsInt("led_visualization_type"),
+    }
+    req.send(JSON.stringify(data))
 }
