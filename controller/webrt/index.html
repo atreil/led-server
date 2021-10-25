@@ -7,10 +7,78 @@
   <title>Audio Reactive LED Strip</title>
 </head>
 
+<link rel="stylesheet" href="css/style.css">
 <script src="js/script.js"></script>
 
 <body>
-  <h1>Daemon</h1>
+  <div id="led_tlc" class="tlc">
+    <h1>LED</h1>
+    <div id="led_visualization_type">
+      <label for="music_visualizer">Music Visualizer</label>
+      <input type="radio" id="music_visualizer_type" name="led_type" value="music_visualizer" onchange="visualizationTypeSelected()" checked><br>
+      <label for="static_color">Static Color</label>
+      <input type="radio" id="static_color_type" name="led_type" value="static_color" onchange="visualizationTypeSelected()"><br>
+    </div>
+    <div id="led_opts" class="tlc">
+      <h2>Options:</h2>
+      <div id="music_visualizer_opts">
+        <label for="music_visualizer_subtype">Visualization Type:</label>
+        <select id="music_visualizer_subtype" onchange="hideSpectrumBase()">
+          <option value="" selected></option>
+          <option value="0">Spectrum</option>
+          <option value="1">Spectrum Base</option>
+          <option value="2">Energy</option>
+          <option value="3">Scroll</option>
+        </select>
+  
+        <div id="led_spectrum_base_opt" hidden>
+          <label for="led_spectrum_base">Spectrum Base Color</label>
+          <input type="color" id="led_spectrum_base">
+        </div>
+  
+        <h2>Advanced Options <a href="#" onclick="hideAdvancedOpt()">(Expand)</a></h2>
+        <div id="music_visualizer_advanced_opts" hidden>
+          <div id="led_min_frequency_opt">
+            <label for="led_min_frequency">Min frequency:</label>
+            <input type="number" id="led_min_frequency">
+          </div>
+          
+          <div id="led_max_frequency">
+            <label for="led_max_frequency">Max frequency:</label>
+            <input type="number" id="led_max_frequency">
+          </div>
+          
+          <div id="led_n_fft_bins">
+            <label for="led_n_fft_bins">FFT Bins:</label>
+            <input type="number" id="led_n_fft_bins">
+          </div>
+        </div>
+      </div>
+      <div id="static_color_opts" hidden>
+        <div id="color_opt_tlc">
+          <div>
+            <label for="set_color">Set Color</label>
+            <input type="radio" id="set_color_type" name="color_label" value="set_color" onchange="colorLabelSelected()" checked><br>
+            <div id="set_color_opts">
+              <label for="color_opt">LED Color:</label>
+              <input type="color" id="color_opt">
+            </div>
+          </div>
+          <div>
+            <label for="clear_color">Clear LED</label>
+            <input type="radio" id="clear_color_type" name="color_label" value="clear_color" onchange="colorLabelSelected()"><br>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="send_led_opts">
+      <button onclick="sendLEDOpts()">Send command</button>
+      <div id="send_led_status">Status:</div>
+    </div>
+  </div>
+
+  <!-- <h1>Daemon</h1>
   <select id="daemon_command">
     <option value="" selected></option>
     <option value="start">Start</option>
@@ -62,6 +130,6 @@
   <br>
   <button onclick="sendLED()">Send command</button>
   <br>
-  <div id="send_led_status">Status:</div>
+  <div id="send_led_status">Status:</div> -->
 </body>
 </html>

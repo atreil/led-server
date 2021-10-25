@@ -71,7 +71,7 @@ func newHTTPServer(dev *Device, daemon *DefaultDaemon, config *Config) (*http.Se
 	mux.Handle("/", http.FileServer(http.Dir(root)))
 	mux.HandleFunc("/daemon", makeHandler(daemon.MakeHandleDaemonCommandRequest(), http.MethodPost))
 	mux.HandleFunc("/device", makeHandler(makeHandleDeviceCommand(dev), http.MethodPost))
-	mux.HandleFunc("/led", makeHandler(config.makeHandleUpdateRequest(), http.MethodPost))
+	mux.HandleFunc("/music", makeHandler(config.makeHandleUpdateRequest(), http.MethodPost))
 
 	return &http.Server{
 		Addr:           *port,
